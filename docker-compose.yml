@@ -11,6 +11,14 @@ services:
     volumes:
       - ./prometheus.yml:/etc/prometheus/prometheus.yml
       - prometheus_data:/prometheus
+    environment:
+      - GF_PATHS_PROVISIONING=/etc/grafana/provisioning
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_AUTH_ANONYMOUS_ENABLED=true
+      - GF_USERS_ALLOW_SIGN_UP=false
+      - GF_USERS_ALLOW_ORG_CREATE=false
+      - GF_INSTALL_PLUGINS=michaeldmoore-multistat-panel,grafana-piechart-panel,yesoreyeram-boomtable-panel
     command:
       - '--config.file=/etc/prometheus/prometheus.yml'
     ports:
@@ -26,7 +34,8 @@ services:
     ports:
       - 3000:3000
   # k6:
-  #   build: .
+  #   image: loadimpact/k6:latest
+  #   container_name: k6
   #   ports:
   #     - '6565:6565'
   #   environment:

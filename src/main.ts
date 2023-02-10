@@ -3,6 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import MainModule from './application/bootstrap/main/main.module';
+import { PinoLoggerService } from './modules/logger/logger.service';
 
 class Application {
   private app: INestApplication;
@@ -34,27 +35,25 @@ class Application {
   public async bootstrap() {
     this.app = await NestFactory.create(MainModule, {
       cors: { origin: '*' },
+      bufferLogs: true,
     });
 
-    const { swaggerUrl, applicationUrl } = this.getUrls();
+    this.app.useLogger(this.app.get(PinoLoggerService));
 
-    this.app.setGlobalPrefix(this.urlPostfix);
+    this.initConfiguration();
     this.initializeSwaggerDocumentation();
 
+    this.app.setGlobalPrefix(this.urlPostfix);
     this.app.useGlobalPipes(
       new ValidationPipe({ transform: true, whitelist: false }),
     );
 
     await this.app.listen(this.configuration.port, this.host);
 
-    Logger.log('\n');
-    Logger.log(`Application is running on: ${applicationUrl}`);
-    Logger.log(`Swagger path: ${swaggerUrl}`);
+    this.printStartApp();
   }
 
   private getUrls() {
-    this.initConfiguration();
-
     return {
       swaggerUrl: `${this.urlPrefix}${this.host}:${this.configuration.port}${this.swaggerPostfix}`,
       applicationUrl: `${this.urlPrefix}${this.host}:${this.configuration.port}${this.urlPostfix}`,
@@ -68,6 +67,14 @@ class Application {
       port: configService.get('port') ? configService.get('port') : 8088,
       appName: configService.get('appName'),
     };
+  }
+
+  private printStartApp() {
+    const { swaggerUrl, applicationUrl } = this.getUrls();
+
+    Logger.log('\n');
+    Logger.log(`Application is running on: ${applicationUrl}`);
+    Logger.log(`Swagger path: ${swaggerUrl}`);
   }
 }
 

@@ -1,8 +1,10 @@
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import MetricsModule from '../../../adapters/metrics/metrics.module';
 import TypeOrmRootModule from '../../../adapters/typeorm/typeorm.module';
+import { LoggerMiddleware } from '../../../core/middleware/logger.middleware';
 import HealthCheckModule from '../../../modules/health-check/health-check.module';
+import LoggerModule from '../../../modules/logger/logger.module';
 import mainConfiguration from './configuration';
 
 const ADAPTERS = [
@@ -18,7 +20,7 @@ const ADAPTERS = [
   }),
 ];
 
-const MODULES = [HealthCheckModule];
+const MODULES = [HealthCheckModule, LoggerModule];
 
 @Module({
   imports: [
@@ -27,4 +29,8 @@ const MODULES = [HealthCheckModule];
     ...MODULES,
   ],
 })
-export default class MainModule {}
+export default class MainModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(LoggerMiddleware);
+  }
+}
