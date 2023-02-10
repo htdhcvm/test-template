@@ -8,7 +8,7 @@ import mainConfiguration from './configuration';
 const ADAPTERS = [
   TypeOrmRootModule,
   MetricsModule.register({
-    available: !process.env.METRICS_AVAILABLE,
+    available: true,
     pushgateway: {
       url: 'http://127.0.0.1:9090',
     },
