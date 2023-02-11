@@ -22,6 +22,17 @@ export class TransformPaginationInterceptor<T>
         const { take, skip } = this.getTakeSkip(query);
 
         if (Array.isArray(response)) {
+          if (response.length === 2) {
+            const [data, count] = response;
+            return {
+              data: data,
+              meta: {
+                count: count,
+                take: take,
+                skip: skip,
+              },
+            };
+          }
           return {
             data: response,
             meta: {
