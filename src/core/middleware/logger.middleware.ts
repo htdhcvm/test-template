@@ -1,17 +1,19 @@
-import { Inject, Injectable, NestMiddleware } from '@nestjs/common';
-import { AsyncLocalStorage } from 'async_hooks';
+import { Injectable, NestMiddleware } from '@nestjs/common';
 import { Request, Response, NextFunction } from 'express';
-import { LOGGER_STORAGE } from '../../modules/logger/providers/logger.provider.const';
-
+import StorageService from '../../modules/storage/storage.service';
+import * as crypto from 'crypto';
 @Injectable()
 export class LoggerMiddleware implements NestMiddleware {
   public constructor(
-    @Inject(LOGGER_STORAGE)
-    private readonly storage: AsyncLocalStorage<Map<string, string>>,
+    private readonly storageService: StorageService<Map<string, string>>,
   ) {}
 
-  use(req: Request, res: Response, next: NextFunction) {
-    console.log('Request...');
-    next();
+  use(req: Request, _: Response, next: NextFunction) {
+    const traceId = req.headers['x-request-id'] || crypto.randomUUID();
+    const store = new Map().set('traceId', traceId);
+
+    this.storageService.run(store, () => {
+      next();
+    });
   }
 }

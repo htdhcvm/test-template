@@ -1,8 +1,16 @@
-import { ValidationPipe, Logger, INestApplication } from '@nestjs/common';
+import {
+  ValidationPipe,
+  Logger,
+  INestApplication,
+  ClassSerializerInterceptor,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { NestFactory } from '@nestjs/core';
+import { NestFactory, Reflector } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import MainModule from './application/bootstrap/main/main.module';
+import { BenchmarkInterceptor } from './core/interceptor/benchmark.interceptor';
+import { EmptyResponseInterceptor } from './core/interceptor/empty-response.interceptor';
+import { TransformPaginationInterceptor } from './core/interceptor/transform.pagination.interceptor';
 import { PinoLoggerService } from './modules/logger/logger.service';
 
 class Application {
@@ -39,14 +47,23 @@ class Application {
     });
 
     this.app.useLogger(this.app.get(PinoLoggerService));
-
-    this.initConfiguration();
-    this.initializeSwaggerDocumentation();
-
     this.app.setGlobalPrefix(this.urlPostfix);
+
+    const CurrentReflector = this.app.get(Reflector);
+
+    this.app.useGlobalInterceptors(
+      new ClassSerializerInterceptor(CurrentReflector),
+      new BenchmarkInterceptor(this.app.get(PinoLoggerService)),
+      new TransformPaginationInterceptor(),
+      new EmptyResponseInterceptor(),
+    );
+
     this.app.useGlobalPipes(
       new ValidationPipe({ transform: true, whitelist: false }),
     );
+
+    this.initConfiguration();
+    this.initializeSwaggerDocumentation();
 
     await this.app.listen(this.configuration.port, this.host);
 

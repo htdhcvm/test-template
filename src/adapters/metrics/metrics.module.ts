@@ -27,7 +27,7 @@ export default class MetricsModule {
     return {
       module: MetricsModule,
       imports: [PrometheusModule.register(options)],
-      providers: []
+      providers: [],
     };
   }
 }

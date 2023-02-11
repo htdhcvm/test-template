@@ -19,7 +19,10 @@ type ReturnDateDifference = {
  * @param {number} dateEnd
  * @returns {ReturnDateDifference}
  */
-function dateDifference(dateStart: Date, dateEnd: Date): ReturnDateDifference {
+function getDateDifference(
+  dateStart: Date,
+  dateEnd: Date,
+): ReturnDateDifference {
   const dateStartMs = dateStart.getTime();
   const dateEndMs = dateEnd.getTime();
 
@@ -47,4 +50,4 @@ function dateDifference(dateStart: Date, dateEnd: Date): ReturnDateDifference {
   };
 }
 
-export default dateDifference;
+export default getDateDifference;

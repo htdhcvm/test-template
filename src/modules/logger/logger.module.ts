@@ -1,10 +1,10 @@
-import { Module } from '@nestjs/common';
+import { Global, Module } from '@nestjs/common';
 import { PinoLoggerService } from './logger.service';
-import loggerStorageProvider from './providers/logger.local-storage.provider';
 import loggerPinoProvider from './providers/logger.pino.provider';
 
+@Global()
 @Module({
-  providers: [loggerPinoProvider, loggerStorageProvider, PinoLoggerService],
+  providers: [loggerPinoProvider, PinoLoggerService],
   exports: [PinoLoggerService],
 })
 export default class LoggerModule {}
